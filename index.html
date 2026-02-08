@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Alarma de 30 Minutos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 320px;
+        }
+        #timer {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #1a73e8;
+            margin: 20px 0;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        input[type="file"] {
+            font-size: 0.8rem;
+        }
+        button {
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #34a853;
+            color: white;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2d8e47;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Alarma 30 min</h2>
+    <p>Paso 1: Sube tu MP3</p>
+    <input type="file" id="audioFile" accept="audio/mp3">
+    
+    <div id="timer">30:00</div>
+    
+    <div class="controls">
+        <button id="startBtn">Iniciar Alarma</button>
+        <button id="stopBtn" style="background-color: #ea4335;">Detener</button>
+    </div>
+    
+    <audio id="alarmSound" loop></audio>
+</div>
+
+<script>
+    let timeLeft = 30 * 60; // 30 minutos en segundos
+    let timerId = null;
+    const timerDisplay = document.getElementById('timer');
+    const audioInput = document.getElementById('audioFile');
+    const alarmSound = document.getElementById('alarmSound');
+    const startBtn = document.getElementById('startBtn');
+
+    // Cargar el archivo de audio
+    audioInput.addEventListener('change', function() {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            alarmSound.src = e.target.result;
+        };
+        reader.readAsDataURL(this.files[0]);
+    });
+
+    function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        
+        if (timeLeft <= 0) {
+            alarmSound.play();
+            timeLeft = 30 * 60; // Reiniciar a 30 minutos
+        } else {
+            timeLeft--;
+        }
+    }
+
+    startBtn.addEventListener('click', () => {
+        if (!alarmSound.src) {
+            alert("Por favor, selecciona primero un archivo MP3.");
+            return;
+        }
+        if (!timerId) {
+            timerId = setInterval(updateTimer, 1000);
+            startBtn.disabled = true;
+        }
+    });
+
+    document.getElementById('stopBtn').addEventListener('click', () => {
+        clearInterval(timerId);
+        timerId = null;
+        alarmSound.pause();
+        alarmSound.currentTime = 0;
+        timeLeft = 30 * 60;
+        timerDisplay.textContent = "30:00";
+        startBtn.disabled = false;
+    });
+</script>
+
+</body>
+</html>
